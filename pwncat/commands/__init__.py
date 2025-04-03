@@ -43,6 +43,7 @@ import shlex
 import pkgutil
 import termios
 import argparse
+import importlib
 from io import TextIOWrapper
 from enum import Enum, auto
 from typing import Dict, List, Type, Callable, Iterable
@@ -432,11 +433,9 @@ class CommandParser:
         for loader, module_name, is_pkg in pkgutil.walk_packages(__path__):
             if module_name == "base":
                 continue
-            self.commands.append(
-                loader.find_module(module_name)
-                .load_module(module_name)
-                .Command(manager)
-            )
+            full_module_name = f"{__name__}.{module_name}"
+            module = importlib.import_module(full_module_name)
+            self.commands.append(module.Command(manager))
 
         self.prompt: PromptSession = None
         self.toolbar: PromptSession = None
@@ -444,9 +443,9 @@ class CommandParser:
         self.aliases: Dict[str, CommandDefinition] = {}
         self.shortcuts: Dict[str, CommandDefinition] = {}
         self.found_prefix: bool = False
-        # Saved terminal state to support switching between raw and normal
-        # mode.
+        # Saved terminal state to support switching between raw and normal mode.
         self.saved_term_state = None
+
 
     def setup_prompt(self):
         """This needs to happen after __init__ when the database is fully
