@@ -34,47 +34,43 @@ Example Custom Command
         def run(self, manager: "pwncat.manager.Manager", args: "argparse.Namespace"):
             manager.log("we ran a custom command!")
 """
-import os
-import re
-import sys
-import tty
-import fcntl
-import shlex
-import pkgutil
-import termios
+
 import argparse
+import fcntl
 import importlib
-from io import TextIOWrapper
+import os
+import pkgutil
+import re
+import shlex
+import sys
+import termios
+import tty
 from enum import Enum, auto
-from typing import Dict, List, Type, Callable, Iterable
 from functools import partial
+from io import TextIOWrapper
+from typing import Callable, Dict, Iterable, List, Type
 
 import rich.text
-from pygments import token
 from prompt_toolkit import ANSI, PromptSession
+from prompt_toolkit.application.current import get_app
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import (CompleteEvent, Completer, Completion,
+                                       WordCompleter, merge_completers)
+from prompt_toolkit.document import Document
+from prompt_toolkit.history import History
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.styles import Style, merge_styles
+from prompt_toolkit.styles.pygments import style_from_pygments_cls
+from pygments import token
 from pygments.lexer import RegexLexer
 from pygments.styles import get_style_by_name
-from prompt_toolkit.lexers import PygmentsLexer
-from prompt_toolkit.styles import Style, merge_styles
-from prompt_toolkit.history import History
-from prompt_toolkit.document import Document
-from prompt_toolkit.completion import (
-    Completer,
-    Completion,
-    CompleteEvent,
-    WordCompleter,
-    merge_completers,
-)
-from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.patch_stdout import patch_stdout
-from prompt_toolkit.styles.pygments import style_from_pygments_cls
-from prompt_toolkit.application.current import get_app
 
 import pwncat
 import pwncat.db
-from pwncat.util import console
 from pwncat.channel import ChannelClosed
+from pwncat.util import console
 
 
 class Complete(Enum):
@@ -446,7 +442,6 @@ class CommandParser:
         # Saved terminal state to support switching between raw and normal mode.
         self.saved_term_state = None
 
-
     def setup_prompt(self):
         """This needs to happen after __init__ when the database is fully
         initialized."""
@@ -787,7 +782,8 @@ class CommandParser:
 
 class CommandLexer(RegexLexer):
     """Implements a Regular Expression based pygments lexer for dynamically highlighting
-    the pwncat prompt during typing. The tokens are generated from command definitions."""
+    the pwncat prompt during typing. The tokens are generated from command definitions.
+    """
 
     tokens = {}
 
